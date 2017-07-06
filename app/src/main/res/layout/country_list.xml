@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="horizontal"
+              android:gravity="center_vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content" android:paddingBottom="16dp" android:paddingEnd="16dp"
+              android:paddingRight="16dp" android:paddingTop="16dp">
+
+    <TextView
+            tools:text="7.1"
+            android:layout_width="36dp"
+            android:textAlignment="center"
+            android:gravity="center_vertical"
+            android:fontFamily="sans-serif-medium"
+            android:background="@drawable/mag_indicator"
+            android:textColor="@android:color/white"
+            android:layout_height="36dp"
+            android:id="@+id/mag" tools:targetApi="jelly_bean" android:layout_marginEnd="16dp"
+            android:layout_marginLeft="16dp" android:layout_marginRight="16dp" android:layout_marginStart="16dp"/>
+
+    <LinearLayout android:layout_width="0dp"
+                  android:orientation="vertical"
+                  android:layout_height="wrap_content"
+                  android:layout_weight="1"
+    >
+
+        <TextView
+                tools:text="24KM SSW OF"
+                android:textSize="12sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/range"/>
+
+        <TextView
+                tools:text="Tokyo, Japan"
+                android:textColor="@color/colorPrimary"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/country"/>
+    </LinearLayout>
+
+    <TextView
+            tools:text="Jan 20, 2016\n12:30 PM"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:id="@+id/date"
+            android:layout_weight="1"
+            android:layout_gravity="end|center_vertical"
+            android:textAlignment="textEnd"/>
+</LinearLayout>
