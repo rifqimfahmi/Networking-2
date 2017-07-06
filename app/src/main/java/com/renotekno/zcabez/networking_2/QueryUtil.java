@@ -37,8 +37,9 @@ public class QueryUtil {
                 double mag = properties.getDouble("mag");
                 long time = properties.getLong("time");
                 String place = properties.getString("place");
+                String url = properties.getString("url");
 
-                EarthQuake earthQuake = new EarthQuake(mag, place, time);
+                EarthQuake earthQuake = new EarthQuake(mag, place, time, url);
                 datas.add(earthQuake);
             }
 

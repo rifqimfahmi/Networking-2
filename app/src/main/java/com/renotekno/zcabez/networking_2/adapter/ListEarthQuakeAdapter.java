@@ -1,11 +1,14 @@
 package com.renotekno.zcabez.networking_2.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import com.renotekno.zcabez.networking_2.EarthQuake;
@@ -18,7 +21,7 @@ import static java.security.AccessController.getContext;
 /**
  * Created by zcabez on 06/07/2017.
  */
-public class ListEarthQuakeAdapter extends ArrayAdapter<EarthQuake> {
+public class ListEarthQuakeAdapter extends ArrayAdapter<EarthQuake> implements AdapterView.OnItemClickListener {
     public ListEarthQuakeAdapter(Context context, ArrayList<EarthQuake> datas) {
         super(context, 0, datas);
     }
@@ -87,5 +90,16 @@ public class ListEarthQuakeAdapter extends ArrayAdapter<EarthQuake> {
                 break;
         }
         return ContextCompat.getColor(getContext(), color);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        EarthQuake tappedEQ = getItem(position);
+
+        Uri uri = Uri.parse(tappedEQ.getURI());
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+
+        getContext().startActivity(intent);
     }
 }

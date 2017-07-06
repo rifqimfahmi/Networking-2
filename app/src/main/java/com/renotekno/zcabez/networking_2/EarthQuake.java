@@ -15,10 +15,12 @@ public class EarthQuake {
     private String range;
     private String country;
     private Date date;
+    private String uri;
 
-    public EarthQuake(double mag, String country, long date) {
+    public EarthQuake(double mag, String country, long date, String uri) {
         this.mag = mag;
         this.date = new Date(date);
+        this.uri = uri;
         assignRangeAndCountry(country);
     }
 
@@ -51,5 +53,9 @@ public class EarthQuake {
             this.range = "Near the";
             this.country = country;
         }
+    }
+
+    public String getURI() {
+        return uri;
     }
 }

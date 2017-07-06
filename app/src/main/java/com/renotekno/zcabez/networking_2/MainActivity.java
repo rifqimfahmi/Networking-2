@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
         listView.setAdapter(adapter);
         // update from web
+        listView.setOnItemClickListener(adapter);
     }
 
     private void initView() {
