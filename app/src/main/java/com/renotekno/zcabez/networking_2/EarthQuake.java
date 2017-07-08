@@ -39,7 +39,7 @@ public class EarthQuake {
     }
 
     public String getDate() {
-        SimpleDateFormat format = new SimpleDateFormat("MM d Y\nH : m a");
+        SimpleDateFormat format = new SimpleDateFormat("MMM d Y\nH : m a");
         return format.format(date);
     }
 
