@@ -52,25 +52,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected ArrayList<EarthQuake> doInBackground(String... strings) {
             Log.d("AsyncTask", "Do in Background...");
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            String jsonRes = null;
 
             if (strings.length < 1 || strings[0] == null){
                 return null;
             }
 
-            URL url = createURL(strings[0]);
-
-            try {
-                jsonRes = makeRequest(url);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return arrayOfEarthQuake(jsonRes);
+            return QueryUtil.fetchData(QueryUtil.USGS_LINK);
         }
 
         @Override
