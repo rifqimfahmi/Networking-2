@@ -1,29 +1,30 @@
 package com.renotekno.zcabez.networking_2;
 
-import android.os.AsyncTask;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 import com.renotekno.zcabez.networking_2.adapter.ListEarthQuakeAdapter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.renotekno.zcabez.networking_2.loader.EarthQuakeLoader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<EarthQuake>> {
 
     private ListView listView;
     private ArrayList<EarthQuake> earthQuakes = new ArrayList<>();
     private ListEarthQuakeAdapter earthQuakeAdapter;
+    private TextView emptyView;
+    private ProgressBar dataFetchProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,109 +34,72 @@ public class MainActivity extends AppCompatActivity {
 
         earthQuakeAdapter = new ListEarthQuakeAdapter(this, earthQuakes);
 
+        listView.setEmptyView(emptyView);
         listView.setAdapter(earthQuakeAdapter);
-        // update from web
         listView.setOnItemClickListener(earthQuakeAdapter);
 
-        new EarthQuakeAsync().execute(QueryUtil.USGS_LINK);
+        // Check internet connection before fetching data from internet
+        if(hasInternetConnection()){
+            getSupportLoaderManager().initLoader(0, null, this);
+        } else {
+            // No internet connection found
+            // Remvoe the progress bar
+            // Set text "No data found"
+            // Display Toast "No internet connection"
+            dataFetchProgressBar.setVisibility(View.GONE);
+            emptyView.setText(this.getString(R.string.no_data_found));
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private boolean hasInternetConnection() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if(networkInfo != null && networkInfo.isConnected()){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Loader<ArrayList<EarthQuake>> onCreateLoader(int id, Bundle args) {
+        Log.d("AsyncTask", "onCreateLoader...");
+        return new EarthQuakeLoader(MainActivity.this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ArrayList<EarthQuake>> loader, ArrayList<EarthQuake> data) {
+        Log.d("AsyncTask", "onLoadFinished...");
+
+        // This indicate that we have receive data back
+        // remove the progressBar from the View
+        dataFetchProgressBar.setVisibility(View.GONE);
+        if (data != null) {
+
+            // Instead of using earthQuakes.addAll(data) and earthQuakeAdapter.notifyDataSetChanged()
+            // we can use the adapter instead to add all data and
+            // it will be automatically notified without specifying notifyDataSetChanged()
+            earthQuakeAdapter.addAll(data);
+        } else {
+
+            // No data found or error happen ( data == null )
+            emptyView.setText(this.getString(R.string.no_data_found));
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<EarthQuake>> loader) {
+        Log.d("AsyncTask", "onLoaderReset...");
+
+        // onLoaderReset usually called when we press the back button ro destroy the activity
+        // When we click the home button {@see onLoaderReset}
+        earthQuakeAdapter.clear();
     }
 
     private void initView() {
         listView = (ListView) findViewById(R.id.listView);
+        emptyView = (TextView) findViewById(R.id.emptyView);
+        dataFetchProgressBar = (ProgressBar) findViewById(R.id.dataFetchProgressBar);
     }
-
-    public class EarthQuakeAsync extends AsyncTask<String, Void, ArrayList<EarthQuake>> {
-
-        private InputStreamReader isr;
-        private BufferedReader reader;
-
-        @Override
-        protected ArrayList<EarthQuake> doInBackground(String... strings) {
-            Log.d("AsyncTask", "Do in Background...");
-
-            if (strings.length < 1 || strings[0] == null){
-                return null;
-            }
-
-            return QueryUtil.fetchData(QueryUtil.USGS_LINK);
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<EarthQuake> earthQuake) {
-            Log.d("AsyncTask", "on Post Execute...");
-            if (earthQuake != null) {
-                earthQuakes.addAll(earthQuake);
-                earthQuakeAdapter.notifyDataSetChanged();
-            }
-        }
-
-        private ArrayList<EarthQuake> arrayOfEarthQuake(@Nullable String jsonRes){
-            if (jsonRes == null) return null;
-            ArrayList<EarthQuake> datas = new ArrayList<>();
-            try {
-                JSONObject jsonObject = new JSONObject(jsonRes);
-                JSONArray features = jsonObject.getJSONArray("features");
-                for (int i = 0; i < features.length(); i++){
-                    JSONObject data = features.getJSONObject(i);
-                    JSONObject properties = data.getJSONObject("properties");
-
-                    double mag = properties.getDouble("mag");
-                    long time = properties.getLong("time");
-                    String place = properties.getString("place");
-                    String url = properties.getString("url");
-
-                    EarthQuake earthQuake = new EarthQuake(mag, place, time, url);
-                    datas.add(earthQuake);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return datas;
-        }
-
-        private String makeRequest(URL url) throws IOException {
-            try {
-                String jsonRes = "";
-                HttpURLConnection request = (HttpURLConnection) url.openConnection();
-                request.setRequestMethod("GET");
-                request.setReadTimeout(10000);
-                request.setConnectTimeout(15000);
-                request.connect();
-
-                isr = new InputStreamReader(request.getInputStream());
-                jsonRes = readFromISR(isr);
-                return jsonRes;
-            } finally {
-                if (isr != null) isr.close();
-                if (reader != null) reader.close();
-            }
-        }
-
-        private String readFromISR(InputStreamReader isr) throws IOException {
-            reader = new BufferedReader(isr);
-            StringBuilder json = new StringBuilder();
-            String line = reader.readLine();
-
-            while (line != null){
-                json.append(line);
-                line = reader.readLine();
-            }
-
-            return json.toString();
-        }
-
-        private URL createURL(String link){
-            URL url = null;
-            try {
-                url = new URL(link);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-            return url;
-        }
-
-    }
-
-
 }
