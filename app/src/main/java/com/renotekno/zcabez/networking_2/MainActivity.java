@@ -1,6 +1,7 @@
 package com.renotekno.zcabez.networking_2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -8,6 +9,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("AsyncTask", "On Create Activity...");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
@@ -60,6 +64,22 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings){
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -101,5 +121,52 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         listView = (ListView) findViewById(R.id.listView);
         emptyView = (TextView) findViewById(R.id.emptyView);
         dataFetchProgressBar = (ProgressBar) findViewById(R.id.dataFetchProgressBar);
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d("AsyncTask", "On Start Activity...");
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d("AsyncTask", "On Resume Activity...");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d("AsyncTask", "On Pause Activity...");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d("AsyncTask", "On Stop Activity...");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d("AsyncTask", "On Destroy Activity...");
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.d("AsyncTask", "On Restart Activity...");
+
+        // Only fetch data when preference is changed
+        // Back button just restart the parent activity
+        // But up button in the action bar destroy the parent Activity
+        // This line of code handle the back button when preference is changed
+        // @important if not the data will be appended to the current list
+        if (SettingsActivity.IS_PREFERENCE_CHANGED){
+            earthQuakes.clear();
+            earthQuakeAdapter.notifyDataSetChanged();
+            dataFetchProgressBar.setVisibility(View.VISIBLE);
+        }
+        super.onRestart();
     }
 }

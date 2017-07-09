@@ -19,24 +19,25 @@ import java.util.ArrayList;
  */
 public class QueryUtil {
 
-    public static final String USGS_LINK = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmag=6&limit=10";
+//    public static final String USGS_LINK_URI = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmag=6&limit=10";
+    public static final String USGS_LINK_URI = "https://earthquake.usgs.gov/fdsnws/event/1/query";
 
     private QueryUtil(){}
 
-    public static ArrayList<EarthQuake> fetchData(){
+    public static ArrayList<EarthQuake> fetchData(String URL){
         // Because the data fetching happen too fast
         // we want to simulate if fetching data take long time using Thread.sleep
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         String jsonRes = null;
 
         // 1. Make an URL instance first before making connection request
         //    Use the String url as the parameter for constructor
-        URL url = createURL(USGS_LINK);
+        URL url = createURL(URL);
 
         try {
             Log.d("AsyncTask", "fetch earthquake data from USGS...");
@@ -71,7 +72,7 @@ public class QueryUtil {
             e.printStackTrace();
         }
 
-        return datas;
+        return (datas.size() > 0) ? datas : null;
     }
 
     private static String makeRequest(URL url) throws IOException {
