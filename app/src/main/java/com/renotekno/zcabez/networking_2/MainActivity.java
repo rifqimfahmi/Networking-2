@@ -1,9 +1,6 @@
 package com.renotekno.zcabez.networking_2;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -15,7 +12,6 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.renotekno.zcabez.networking_2.adapter.ListEarthQuakeAdapter;
 import com.renotekno.zcabez.networking_2.loader.EarthQuakeLoader;
 
@@ -43,27 +39,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         listView.setOnItemClickListener(earthQuakeAdapter);
 
         // Check internet connection before fetching data from internet
-        if(hasInternetConnection()){
-            getSupportLoaderManager().initLoader(0, null, this);
-        } else {
-            // No internet connection found
-            // Remvoe the progress bar
-            // Set text "No data found"
-            // Display Toast "No internet connection"
-            dataFetchProgressBar.setVisibility(View.GONE);
-            emptyView.setText(this.getString(R.string.no_data_found));
-            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    private boolean hasInternetConnection() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if(networkInfo != null && networkInfo.isConnected()){
-            return true;
-        }
-        return false;
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -75,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings){
+        if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         }
@@ -92,10 +68,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoadFinished(Loader<ArrayList<EarthQuake>> loader, ArrayList<EarthQuake> data) {
         Log.d("AsyncTask", "onLoadFinished...");
 
-        // This indicate that we have receive data back
-        // remove the progressBar from the View
-        dataFetchProgressBar.setVisibility(View.GONE);
-        if (data != null) {
+        if (data != null && data.size() > 0) {
 
             // Instead of using earthQuakes.addAll(data) and earthQuakeAdapter.notifyDataSetChanged()
             // we can use the adapter instead to add all data and
@@ -106,6 +79,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             // No data found or error happen ( data == null )
             emptyView.setText(this.getString(R.string.no_data_found));
         }
+
+        // This indicate that we have receive data back
+        // remove the progressBar from the View
+        dataFetchProgressBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -162,9 +139,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // But up button in the action bar destroy the parent Activity
         // This line of code handle the back button when preference is changed
         // @important if not the data will be appended to the current list
-        if (SettingsActivity.IS_PREFERENCE_CHANGED){
+        if (SettingsActivity.IS_PREFERENCE_CHANGED) {
             earthQuakes.clear();
             earthQuakeAdapter.notifyDataSetChanged();
+            emptyView.setText("");
             dataFetchProgressBar.setVisibility(View.VISIBLE);
         }
         super.onRestart();

@@ -2,10 +2,14 @@ package com.renotekno.zcabez.networking_2.loader;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
+import android.widget.Toast;
 import com.renotekno.zcabez.networking_2.EarthQuake;
 import com.renotekno.zcabez.networking_2.QueryUtil;
 import com.renotekno.zcabez.networking_2.R;
@@ -17,8 +21,11 @@ import java.util.ArrayList;
  */
 public class EarthQuakeLoader extends AsyncTaskLoader<ArrayList<EarthQuake>> {
 
+    Handler mainHandler;
+
     public EarthQuakeLoader(Context context) {
         super(context);
+        mainHandler = new Handler(context.getMainLooper());
     }
 
     @Override
@@ -31,6 +38,34 @@ public class EarthQuakeLoader extends AsyncTaskLoader<ArrayList<EarthQuake>> {
     @Override
     public ArrayList<EarthQuake> loadInBackground() {
         Log.d("AsyncTask", "loadInBackground...");
+
+        if (hasInternetConnection()) {
+            String url = buildURL();
+            return QueryUtil.fetchData(url);
+        }
+
+        alertNoInternet();
+        return new ArrayList<EarthQuake>();
+    }
+
+    private void alertNoInternet() {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getContext(), "No Internet Connection", Toast.LENGTH_SHORT).show();
+            }
+        };
+        mainHandler.post(runnable);
+    }
+
+    private boolean hasInternetConnection() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
+    private String buildURL() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String minMag = sharedPreferences.getString(getContext().getString(R.string.settings_min_magnitude_key), getContext().getString(R.string.settings_min_magnitude_default));
 
@@ -42,7 +77,7 @@ public class EarthQuakeLoader extends AsyncTaskLoader<ArrayList<EarthQuake>> {
         uriBuilder.appendQueryParameter("limit", "10");
         uriBuilder.appendQueryParameter("orderby", "time");
 
-        return QueryUtil.fetchData(uriBuilder.toString());
+        return uriBuilder.toString();
     }
 
 

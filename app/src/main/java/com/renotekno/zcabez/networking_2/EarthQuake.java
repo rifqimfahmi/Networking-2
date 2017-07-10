@@ -3,6 +3,7 @@ package com.renotekno.zcabez.networking_2;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by zcabez on 06/07/2017.
@@ -39,7 +40,7 @@ public class EarthQuake {
     }
 
     public String getDate() {
-        SimpleDateFormat format = new SimpleDateFormat("MMM d Y\nH : m a");
+        SimpleDateFormat format = new SimpleDateFormat("MMM d y\nH : m a", Locale.US);
         return format.format(date);
     }
 
