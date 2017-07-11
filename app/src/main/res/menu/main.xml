@@ -6,7 +6,7 @@
     <item
             android:id="@+id/action_settings"
             android:title="@string/settings_menu_item"
-            android:icon="@drawable/ic_tune_white_24dp"
+            android:icon="@drawable/ic_tune_black_24dp"
             android:orderInCategory="1"
             app:showAsAction="ifRoom" />
 </menu>
