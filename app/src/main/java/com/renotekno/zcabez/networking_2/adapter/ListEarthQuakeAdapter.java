@@ -28,28 +28,33 @@ public class ListEarthQuakeAdapter extends ArrayAdapter<EarthQuake> implements A
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (view == null) {
-            view = LayoutInflater.from(getContext()).inflate(R.layout.country_list, parent, false);
+        EarthQuakeVH earthQuakeVH;
+
+        if (convertView == null) {
+            earthQuakeVH = new EarthQuakeVH();
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.country_list, parent, false);
+            earthQuakeVH.mag = (TextView) convertView.findViewById(R.id.mag);
+            earthQuakeVH.range = (TextView) convertView.findViewById(R.id.range);
+            earthQuakeVH.country = (TextView) convertView.findViewById(R.id.country);
+            earthQuakeVH.date = (TextView) convertView.findViewById(R.id.date);
+
+            convertView.setTag(earthQuakeVH);
+        } else {
+            earthQuakeVH = (EarthQuakeVH) convertView.getTag();
         }
 
         EarthQuake earthQuake = getItem(position);
 
-        TextView mag = (TextView) view.findViewById(R.id.mag);
-        TextView range = (TextView) view.findViewById(R.id.range);
-        TextView country = (TextView) view.findViewById(R.id.country);
-        TextView date = (TextView) view.findViewById(R.id.date);
+        earthQuakeVH.mag.setText(earthQuake.getMag());
 
-        mag.setText(earthQuake.getMag());
-
-        GradientDrawable magColor = (GradientDrawable) mag.getBackground();
+        GradientDrawable magColor = (GradientDrawable) earthQuakeVH.mag.getBackground();
         magColor.setColor(getMagnitudeColor(earthQuake.getMag()));
 
-        range.setText(earthQuake.getRange());
-        country.setText(earthQuake.getCountry());
-        date.setText(earthQuake.getDate());
+        earthQuakeVH.range.setText(earthQuake.getRange());
+        earthQuakeVH.country.setText(earthQuake.getCountry());
+        earthQuakeVH.date.setText(earthQuake.getDate());
 
-        return view;
+        return convertView;
     }
 
     private int getMagnitudeColor(String mag){
@@ -101,5 +106,12 @@ public class ListEarthQuakeAdapter extends ArrayAdapter<EarthQuake> implements A
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 
         getContext().startActivity(intent);
+    }
+
+    static class EarthQuakeVH {
+        TextView mag;
+        TextView range;
+        TextView country;
+        TextView date;
     }
 }
